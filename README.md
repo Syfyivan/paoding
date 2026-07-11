@@ -1,0 +1,155 @@
+<div align="center">
+
+<img src="app/icons/icon-512.png" width="112" alt="庖丁" />
+
+# 庖丁 · Paoding
+
+**把做菜视频拆成分步骤，讲透每一步「为什么这么做」。**
+
+_Turn any cooking video into step-by-step instructions that explain the **why** behind every move._
+
+<p>
+<img src="https://img.shields.io/badge/license-MIT-E4572E" />
+<img src="https://img.shields.io/badge/PWA-可装到手机主屏-6A8D3F" />
+<img src="https://img.shields.io/badge/本地零成本-Ollama%20%2B%20whisper.cpp-2A2724" />
+<img src="https://img.shields.io/badge/Node-22%2B-8A817A" />
+</p>
+
+<img src="docs/assets/cook.gif" width="300" alt="跟做模式演示" />
+
+</div>
+
+---
+
+## 这是什么
+
+给它一个做菜视频（B站 / 抖音 / YouTube 链接、本地文件），**或一段图文/文字帖**（小红书 / 公众号 / 任意粘贴的文字），庖丁会：
+
+1. **听懂它** —— 视频走「下载音频 → 语音转文字」；文字帖直接读文字（口播/文案是做菜内容里最值钱的信息）。
+2. **拆成步骤** —— 大模型整理成结构化菜谱：食材（含 `qty/unit` 可精确缩放）、火候、时间、到位判断。
+3. **讲透为什么** —— 对**每一步**生成三段式讲解：
+   > 🤔 **为什么这么做** ｜ **不这么做会怎样** ｜ **怎么判断到位了**
+4. **陪你做** —— 手机 App + 电脑桌面双端：一步一屏、语音免手、多计时器、AI 随问、本步用到的食材高亮。
+
+## 为什么不一样
+
+市面上"视频转菜谱"的工具不少，但它们只给你一份**扁平菜谱**——告诉你*做什么*，不告诉你*为什么*。而讲原理讲得好的（America's Test Kitchen、ChefSteps）又是人工编辑、不吃你随手刷到的视频。
+
+**庖丁把两者缝在一起**：自动解析任意视频 × 每步深度原理讲解。你不只是照着做，而是**搞懂**——为什么油要七成热、为什么先焯水、为什么这步省了会翻车。
+
+<div align="center">
+<img src="docs/assets/why.png" width="300" alt="每步讲透为什么" />
+</div>
+
+## 功能
+
+| | |
+|---|---|
+| 🎬 **智能解析** | 粘链接（B站/抖音/YouTube）或传视频，**实时进度**、可后台化；手机可从别的 App 分享链接直接解析 |
+| 📝 **文字也能解析** | 除视频外：**粘贴小红书图文/公众号/任意文字帖**，或贴链接时自动兜底抓网页文字 |
+| 📱 **双端一套** | 手机装成 App（Capacitor 安卓 APK）+ 电脑桌面响应式；同一后端、改一处两端同步、检测到新版**自动更新**（免重装） |
+| 📖 **跟做模式** | 一步一屏 / 大字 / 屏幕常亮 / 进度条 / 左右滑 / 断点续做 / **本步用到的食材高亮** |
+| 🤔 **每步为什么** | 三段式原理讲解，关键信息（火候/时间/用量）高亮，术语可点开秒懂 |
+| 🎙 **免手操作** | 语音说「下一步 / 上一步 / 朗读」翻页，朗读当前步骤（洗手做菜刚需） |
+| ⏱ **多计时器** | 从步骤自动识别时长，多个并行、跨步骤保留、到点响铃+震动+系统通知 |
+| 💬 **AI 助手** | 对每步追问、🆘 翻车补救、食材替代（**该替就替、不能替直说**）、整菜设计、营养估算 |
+| 🧺 **食材 & 购物** | 份量缩放（按 `qty/unit` 精确重算）、购物清单**同名合并 + 按品类归类** |
+| ✏️ **可编辑** | AI 出错能直接改：标题/用量/步骤/讲解随手修正，保存即同步 |
+| ☁️ **同步 & 备份** | 收藏/笔记/评分/购物清单**跨设备共享**（手机↔电脑）；一键导出备份 / 导入恢复 |
+| 📤 **开放导出** | 复制 Markdown、下载 **Cooklang `.cook`** 与 **schema.org JSON-LD**，与菜谱生态互通 |
+| ⭐ **收藏 & 记录** | 收藏整菜 + 收藏单步技巧、笔记、做过打卡 + 评分、搜索/标签筛选 |
+| 🌙 **顺手** | 暗色模式、字号、朗读语速、装到主屏（PWA）、离线看已解析菜谱、双指缩放 |
+| 🛡 **诚实** | 视频没讲清的绝不臆造，如实标「视频未明确」；每步带置信度，靠推测的会标「⚠️ 推测」 |
+
+<div align="center">
+<img src="docs/assets/home.png" width="270" alt="首页" />&nbsp;&nbsp;
+<img src="docs/assets/dark.png" width="270" alt="暗色模式" />
+</div>
+
+## 管线
+
+```
+视频URL / 本地文件                     图文帖链接 / 粘贴的文字
+   → [yt-dlp]  下载音频 + 标题/简介         → [fetch]  抓网页文字(og/正文) 或直接用粘贴内容
+   → [ffmpeg]  抽音轨（16k 单声道）                       │
+   → [ASR]     口播转文字(whisper.cpp/云)                 │
+        └──────────────┬──────────────────────────────────┘
+                       ↓
+                → [LLM]  整理成结构化菜谱 JSON（食材 qty/unit、火候、时间…）
+                → [LLM]  逐步生成「为什么」讲解     ← 庖丁的核心差异
+                → JSON + Markdown + 双端跟做（可导出 .cook / JSON-LD）
+```
+
+> 视频抓不到时（如小红书无 yt-dlp 抽取器）会**自动改按文字帖**抓网页文字；纯图文/文字帖直接走右侧文字管线。
+
+## 快速开始
+
+**依赖**：Node 22+、`ffmpeg`、`yt-dlp`（解析在线链接用），以及大模型+ASR（本地或云端）。
+
+### 方案 A：全本地零成本（推荐，Mac 首选）
+
+```bash
+# 大模型（Ollama 自带 OpenAI 兼容接口）
+ollama pull qwen2.5:14b
+
+# 本地语音转写
+brew install whisper-cpp ffmpeg yt-dlp
+mkdir -p models
+curl -L -o models/ggml-large-v3-turbo.bin \
+  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin
+
+# 配置（默认就是本地方案）
+cp .env.example .env
+
+# 起 App
+node app/server.mjs
+```
+
+不花钱、不申请 key、视频不出本机。想提质量随时把 `.env` 里的 `PAODING_LLM_*` 换成云端旗舰模型（豆包 / Gemini / GPT / Claude 等任意 OpenAI 兼容接口），其余不变。
+
+### 命令行（不开 App）
+
+```bash
+node bin/paoding.mjs ./红烧肉.mp4
+node bin/paoding.mjs "https://www.bilibili.com/video/BVxxxx" --depth advanced
+```
+
+## 装到手机
+
+`node app/server.mjs` 启动后会打印**局域网地址**（如 `http://192.168.1.5:4177`）。手机连同一 WiFi 打开它 → 浏览器菜单「添加到主屏幕」→ 就是一个全屏 App。App 界面跑在手机、解析引擎跑在电脑，两者通过局域网通信。
+
+> B站等平台反爬（HTTP 412）：`.env` 里设 `PAODING_COOKIES_FROM_BROWSER=chrome`，借用浏览器已登录的 cookie 即可。
+
+## 目录
+
+```
+src/            解析引擎（download / fetchText / transcribe / chef / explain / pipeline）
+bin/paoding.mjs 命令行入口
+app/            跟做 App / PWA（index.html + styles.css + app.js + sw.js + server.mjs）
+android/        Capacitor 安卓工程（npx cap sync android 后 gradlew 打 APK）
+docs/           产品需求与技术方案
+```
+
+产出的菜谱 JSON（每步含 `why`、`risk_level`、`confidence`）就是 App 的数据契约。
+
+## Roadmap
+
+- [x] 文字帖解析（小红书图文 / 公众号 / 粘贴文字）+ 视频抓不到时自动兜底
+- [x] Capacitor 打包安卓 APK + 桌面响应式（双端一套代码）
+- [x] 跨设备同步收藏/笔记/评分/购物清单 + 导出备份
+- [x] 菜谱可编辑、结构化用量份量缩放、购物清单智能合并、导出 Cooklang / schema.org
+- [ ] 抽帧 + 视觉 OCR，兜住「没口播只有字幕」的视频
+- [ ] 膳食计划（周日历排菜 → 一键合并购物清单）
+- [ ] 更多真实视频调 prompt，沉淀跨视频「技法库」
+
+## 致谢
+
+站在开源肩膀上：[yt-dlp](https://github.com/yt-dlp/yt-dlp) · [whisper.cpp](https://github.com/ggerganov/whisper.cpp) · [Ollama](https://ollama.com) · [ffmpeg](https://ffmpeg.org)。
+
+## License
+
+[MIT](LICENSE)
+
+<div align="center">
+<sub>庖丁解牛 —— 把每一道菜，解剖到你看得懂为什么。</sub>
+</div>
