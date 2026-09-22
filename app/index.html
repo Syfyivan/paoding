@@ -16,12 +16,19 @@
 <div id="app">
   <header>
     <div class="brand"><h1>庖丁</h1><span class="sub">解剖每一道菜的为什么</span></div>
+    <span class="brand-note">你的厨房手记</span>
   </header>
 
   <div class="parsebar">
+    <div class="parse-intro">
+      <p class="eyebrow">从一道想做的菜开始</p>
+      <h2>不止照着做，<br>更懂为什么。</h2>
+      <p>把视频或文字菜谱，整理成能跟着做的步骤。</p>
+    </div>
+    <label class="source-label" for="url">导入一道菜</label>
     <div class="row">
       <input id="url" type="text" inputmode="url" placeholder="粘贴 B站 / 抖音 / 小红书 / YouTube 链接" />
-      <button class="btn" id="parseUrl">解析</button>
+      <button class="btn" id="parseUrl">开始解析</button>
     </div>
     <div class="depth" id="depth">
       <span class="depth-lbl">讲解深度</span>
@@ -42,7 +49,7 @@
   </div>
 
   <div class="searchrow" id="searchrow">
-    <input id="search" type="search" placeholder="搜索菜名 / 食材 / 标签" />
+    <input id="search" type="search" aria-label="搜索菜谱" placeholder="搜索菜名、食材或标签" />
   </div>
   <div class="filters" id="filters"></div>
 

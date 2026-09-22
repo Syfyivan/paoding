@@ -201,7 +201,7 @@ function renderFilters() {
 function renderRecipes() {
   const box = $('#view-recipes');
   const items = recipes.filter(matchFilter);
-  if (!recipes.length) { box.innerHTML = '<div class="empty">还没有菜谱。<br>粘贴一个做菜视频链接，或上传本地视频开始解析。</div>'; return; }
+  if (!recipes.length) { box.innerHTML = '<div class="empty"><strong>收藏你的第一道拿手菜</strong><p>从上方导入视频或文字菜谱。食材、步骤和每一步的原理，都会整理在这里。</p></div>'; return; }
   if (!items.length) { box.innerHTML = '<div class="empty">没有匹配的菜谱。</div>'; return; }
   box.innerHTML = '';
   items.forEach(r => {
