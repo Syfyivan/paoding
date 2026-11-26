@@ -1,5 +1,6 @@
 import http from "node:http";
 import fs from "node:fs";
+import { createRecipeLibrary } from "../src/recipe-library.mjs";
 import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -64,22 +65,7 @@ ${ings ? `<h2>食材</h2><ul class="ings">${ings}</ul>` : ""}
 </div></body></html>`;
 }
 
-function listRecipes() {
-  return fs
-    .readdirSync(RECIPES_DIR)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => {
-      try {
-        const r = JSON.parse(fs.readFileSync(path.join(RECIPES_DIR, f), "utf8"));
-        r.id = f.replace(/\.json$/, "");
-        return r;
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean)
-    .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
-}
+const listRecipes = createRecipeLibrary(RECIPES_DIR);
 function loadRecipe(id) {
   const p = path.join(RECIPES_DIR, `${path.basename(id)}.json`);
   if (!fs.existsSync(p)) return null;
