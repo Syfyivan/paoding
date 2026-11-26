@@ -97,9 +97,10 @@ async function transcribeCloud(asr, audioPath, onProgress = () => {}) {
 
 // 单个音频文件 → 文本（一次 OpenAI 兼容请求）。
 async function transcribeChunk(asr, filePath) {
-  const buf = fs.readFileSync(filePath);
+  // The extracted audio is immutable until the request finishes.
+  const audio = await fs.openAsBlob(filePath);
   const form = new FormData();
-  form.append("file", new Blob([buf]), path.basename(filePath));
+  form.append("file", audio, path.basename(filePath));
   form.append("model", asr.model);
   form.append("prompt", "这是一段中文做菜教学视频，包含食材、用量、火候和步骤。");
 
