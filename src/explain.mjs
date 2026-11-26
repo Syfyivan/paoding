@@ -45,18 +45,25 @@ export async function explainSteps(llm, recipe, depth) {
     temperature: 0.4,
   });
 
-  const byIndex = new Map(
-    (out.explanations || []).map((e) => [Number(e.index), e]),
-  );
+  const byIndex = new Map();
+  const explanations = Array.isArray(out?.explanations) ? out.explanations : [];
+  for (const explanation of explanations) {
+    const index = explanation?.index;
+    if (typeof index !== "number" && (typeof index !== "string" || !index.trim())) continue;
+    const number = Number(index);
+    if (Number.isFinite(number)) byIndex.set(number, explanation);
+  }
 
   // 把讲解合并回每一步；缺失的给出兜底占位，绝不静默丢步。
   for (const step of recipe.steps) {
     const e = byIndex.get(Number(step.index));
-    step.why = e
-      ? { reason: e.reason || "", if_not: e.if_not || "", cue: e.cue || "" }
-      : { reason: "（本步未生成讲解）", if_not: "", cue: "" };
-    step.risk_level = e?.risk_level || "unknown";
-    step.confidence = e?.confidence || "low";
+    const reason = typeof e?.reason === "string" ? e.reason.trim() : "";
+    const ifNot = typeof e?.if_not === "string" ? e.if_not.trim() : "";
+    const cue = typeof e?.cue === "string" ? e.cue.trim() : "";
+    const hasExplanation = Boolean(reason || ifNot || cue);
+    step.why = { reason: hasExplanation ? reason : "（本步未生成讲解）", if_not: ifNot, cue };
+    step.risk_level = hasExplanation && ["low", "medium", "high"].includes(e?.risk_level) ? e.risk_level : "unknown";
+    step.confidence = hasExplanation && ["low", "medium", "high"].includes(e?.confidence) ? e.confidence : "low";
   }
   return recipe;
 }
